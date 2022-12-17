@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 type TCard = {
   name: string;
   link: string;
-  owner: string;
-  likes: string[];
+  owner: mongoose.Schema.Types.ObjectId;
+  likes: mongoose.Schema.Types.ObjectId[];
   createdAt: Date;
 }
 
@@ -20,11 +20,14 @@ const cardSchema = new mongoose.Schema<TCard>({
     require: true
   },
   owner: {
-
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user'
   },
-  likes: {
-
-  },
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    default: []
+  }],
   createdAt: {
     type: Date,
     default: Date.now()
