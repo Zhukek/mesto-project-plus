@@ -1,93 +1,91 @@
-import { RequestCustom } from "../app";
-import {Response, Request} from "express";
-import Card from "../models/card";
-import User from "../models/user";
-import { NOT_FOUND_ERROR_STATUS, SERVER_ERROR_STATUS, WRONG_DATA_ERROR } from "../services/errors";
+import { Response, Request } from 'express';
+import { RequestCustom } from '../services/types';
+import Card from '../models/card';
+import User from '../models/user';
+import { SERVER_ERROR_STATUS, WRONG_DATA_ERROR } from '../services/errors';
 
-export const getCards = (req: Request, res: Response) => {
-  return Card.find({})
-    .then((cards) => {res.send({cards: cards})})
-    .catch(() => {
-      res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так')
-    })
-}
+export const getCards = (req: Request, res: Response) => Card.find({})
+  .then((cards) => { res.send({ cards }); })
+  .catch(() => {
+    res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+  });
 
 export const createCard = (req: Request, res: Response) => {
   const id = (req as RequestCustom)?.user?._id;
   const { name, link } = req.body;
 
-  return Card.create({name: name, link: link, owner: id})
+  return Card.create({ name, link, owner: id })
     .then((card) => {
-      if(!name || !link) {
+      if (!name || !link) {
         const error = new Error(WRONG_DATA_ERROR.message);
         error.name = WRONG_DATA_ERROR.name;
-        throw error
+        throw error;
       }
-      res.send({card: card})
+      res.send({ card });
     })
     .catch((err) => {
-      if (err.name === WRONG_DATA_ERROR.name) {
-        res.status(WRONG_DATA_ERROR.status).send(err.message)
+      if (err.name === WRONG_DATA_ERROR.name || err.name === 'ValidationError') {
+        res.status(WRONG_DATA_ERROR.status).send(err.message);
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так')
+        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
       }
-    })
-}
+    });
+};
 
 export const deleteCardById = (req: Request, res: Response) => {
-  return Card.findByIdAndDelete(req.params.cardId)
+  const id = req.params.cardId;
+
+  return Card.findByIdAndDelete(id)
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === "CastError") {
-        res.status(NOT_FOUND_ERROR_STATUS).send("Запрашиваемая карточка не найдена")
+      if (err.name === 'CastError') {
+        res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так')
+        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
       }
-    })
-}
+    });
+};
 
 export const likeCard = (req: Request, res: Response) => {
   const id = (req as RequestCustom)?.user?._id;
   User.findById(id)
     .catch(() => {
-      res.status(400).send('Передан неверный пользователь')
-      return
-    })
+      res.status(400).send('Передан неверный пользователь');
+    });
 
   return Card.findByIdAndUpdate(req.params.cardId, {
-    $addToSet: { likes: id }
+    $addToSet: { likes: id },
   }, {
-    new: true
+    new: true,
   })
-    .then((card) => res.send({card: card}))
+    .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === "CastError") {
-        res.status(NOT_FOUND_ERROR_STATUS).send("Запрашиваемая карточка не найдена")
+      if (err.name === 'CastError') {
+        res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так')
+        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
       }
-    })
-}
+    });
+};
 
 export const removeLike = (req: Request, res: Response) => {
   const id = (req as RequestCustom)?.user?._id;
   User.findById(id)
     .catch(() => {
-      res.status(400).send('Передан неверный пользователь')
-      return
-    })
+      res.status(400).send('Передан неверный пользователь');
+    });
 
   return Card.findByIdAndUpdate(req.params.cardId, {
-    $pull: { likes: id }
+    $pull: { likes: id },
   }, {
-    new: true
+    new: true,
   })
-    .then((card) => res.send({card: card}))
+    .then((card) => res.send({ card }))
     .catch((err) => {
-      if (err.name === "CastError") {
-        res.status(NOT_FOUND_ERROR_STATUS).send("Запрашиваемая карточка не найдена")
+      if (err.name === 'CastError') {
+        res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так')
+        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
       }
-    })
-}
+    });
+};

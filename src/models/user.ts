@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import urlValidate from '../services/urlValidate';
 
 type TUser = {
   name: string;
@@ -22,7 +23,11 @@ const userSchema = new mongoose.Schema<TUser>({
   avatar: {
     type: String,
     require: true,
-  }
-})
+    validate: {
+      validator: urlValidate,
+      message: 'Неверно указан url',
+    },
+  },
+});
 
-export default mongoose.model<TUser>('user', userSchema)
+export default mongoose.model<TUser>('user', userSchema);

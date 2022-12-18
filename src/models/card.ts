@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import urlValidate from '../services/urlValidate';
 
 type TCard = {
   name: string;
@@ -17,21 +18,25 @@ const cardSchema = new mongoose.Schema<TCard>({
   },
   link: {
     type: String,
-    require: true
+    require: true,
+    validate: {
+      validator: urlValidate,
+      message: 'Неверно указан url',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
+    ref: 'user',
   },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
-    default: []
+    default: [],
   }],
   createdAt: {
     type: Date,
-    default: Date.now()
-  }
-})
+    default: Date.now(),
+  },
+});
 
-export default mongoose.model<TCard>('card', cardSchema)
+export default mongoose.model<TCard>('card', cardSchema);
