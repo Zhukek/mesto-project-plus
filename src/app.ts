@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(limiter);
-app.use(helmet);
+app.use(helmet());
 
 app.use((req: Request, res: Response, next) => {
   (req as RequestCustom).user = {

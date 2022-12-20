@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import urlValidate from '../services/urlValidate';
+import { urlValidate } from '../services/validate';
 
 type TCard = {
   name: string;
