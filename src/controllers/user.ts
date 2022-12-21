@@ -4,6 +4,7 @@ import User from '../models/user';
 import { SERVER_ERROR_STATUS, WRONG_DATA_ERROR } from '../services/errors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { keyString } from '../services/constants';
 
 export const getUsers = (req: Request, res: Response) => User.find({})
   .then((users) => res.send({ users }))
@@ -104,7 +105,7 @@ export const login = (req: Request, res: Response) => {
   return User.loginUser(email, password)
     .then((user) => {
 
-      const token = jwt.sign({ _id: user._id }, 'keyString', {expiresIn: '7d'});
+      const token = jwt.sign({ _id: user._id }, keyString, {expiresIn: '7d'});
       res.send({token: token});
     })
     .catch((err) => {
