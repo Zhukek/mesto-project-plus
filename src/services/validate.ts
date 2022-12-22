@@ -1,4 +1,4 @@
-import validator from "validator";
+import validator from 'validator';
 
 const regexp = new RegExp('^(https?:\\/\\/)?'
   + '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'
@@ -8,4 +8,4 @@ const regexp = new RegExp('^(https?:\\/\\/)?'
   + '(\\#[-a-z\\d_]*)?$', 'i');
 
 export const urlValidate = (url: string) => regexp.test(url);
-export const emailValidate = (str: string) => validator.isEmail(str)
+export const emailValidate = (str: string) => validator.isEmail(str);

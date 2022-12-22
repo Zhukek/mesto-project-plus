@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
-import { urlValidate, emailValidate } from '../services/validate';
 import bcrypt from 'bcrypt';
+import { urlValidate, emailValidate } from '../services/validate';
+import { AuthError } from '../services/errors';
 
 type TUser = {
   name: string;
@@ -29,13 +30,14 @@ const userSchema = new mongoose.Schema<TUser, IUserModel>({
     required: true,
     validate: {
       validator: emailValidate,
-      message: 'Невалидный email'
+      message: 'Невалидный email',
     },
     unique: true,
   },
   password: {
     type: String,
     required: true,
+    select: false,
   },
   about: {
     type: String,
@@ -54,25 +56,21 @@ const userSchema = new mongoose.Schema<TUser, IUserModel>({
 });
 
 userSchema.static('loginUser', function loginUser(email: string, password: string) {
-  const error = new Error('Неправильные почта или пароль');
-  error.name = "WrongUserOrPass";
-
-  return this.findOne({email})
+  return this.findOne({ email }).select(+password)
     .then((user) => {
-      if(!user) {
-        throw error;
+      if (!user) {
+        throw new AuthError('Неверное имя или пароль');
       }
 
       return bcrypt.compare(password, user.password)
-      .then((match) => {
-        if(!match) {
-          throw error
-        }
+        .then((match) => {
+          if (!match) {
+            throw new AuthError('Неверное имя или пароль');
+          }
 
-        return user
-      })
-    })
+          return user;
+        });
+    });
 });
 
-
-export default mongoose.model<TUser, IUserModel>('user', userSchema);;
+export default mongoose.model<TUser, IUserModel>('user', userSchema);

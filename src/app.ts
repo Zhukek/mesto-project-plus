@@ -1,12 +1,13 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cardsRouter from './routes/cards';
 import userRouter from './routes/user';
-import { RequestCustom } from './services/types';
 import { createUser, login } from './controllers/user';
 import auth from './middlewares/auth';
+import { requestLogger, errorLogger } from './middlewares/logger';
+import errorMiddleware from './middlewares/errorMiddleware';
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -26,18 +27,16 @@ app.use(helmet());
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use((req: Request, res: Response, next) => {
-  (req as RequestCustom).user = {
-    _id: '639e05c8c088b487bf17dd76',
-  };
-
-  next();
-});
+app.use(requestLogger);
 
 app.post('/signin', login);
 app.post('/signup', createUser);
-app.use('/users',auth, userRouter);
-app.use('/cards',auth, cardsRouter);
+app.use('/users', auth, userRouter);
+app.use('/cards', auth, cardsRouter);
+
+app.use(errorLogger);
+
+app.use(errorMiddleware);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
