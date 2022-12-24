@@ -2,7 +2,7 @@ import { Response, Request, NextFunction } from 'express';
 import { RequestCustom } from '../services/types';
 import Card from '../models/card';
 import User from '../models/user';
-import { ForbiddenError, WrongDataError, WRONG_DATA_ERROR_STATUS } from '../services/errors';
+import { ForbiddenError, WrongDataError, NotFoundError } from '../services/errors';
 
 export const getCards = (req: Request, res: Response, next: NextFunction) => Card.find({})
   .then((cards) => { res.send({ cards }); })
@@ -28,6 +28,9 @@ export const deleteCardById = (req: RequestCustom, res: Response, next: NextFunc
 
   return Card.findById(id)
     .then((card) => {
+      if(!card) {
+        throw new NotFoundError('Такой карточки не существует')
+      }
       if (String(card?.owner) !== userId) {
         throw new ForbiddenError('Это не ваша карточка');
       }
@@ -41,7 +44,8 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
   const id = (req as RequestCustom)?.user?._id;
   User.findById(id)
     .catch(() => {
-      res.status(WRONG_DATA_ERROR_STATUS).send('Передан неверный пользователь');
+      const error = new WrongDataError('Передан неверный пользователь');
+      res.status(error.status).send(error.message);
     });
 
   return Card.findByIdAndUpdate(req.params.cardId, {
@@ -57,7 +61,8 @@ export const removeLike = (req: Request, res: Response, next: NextFunction) => {
   const id = (req as RequestCustom)?.user?._id;
   User.findById(id)
     .catch(() => {
-      res.status(WRONG_DATA_ERROR_STATUS).send('Передан неверный пользователь');
+      const error = new WrongDataError('Передан неверный пользователь');
+      res.status(error.status).send(error.message);
     });
 
   return Card.findByIdAndUpdate(req.params.cardId, {

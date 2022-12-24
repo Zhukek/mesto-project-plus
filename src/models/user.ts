@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema<TUser, IUserModel>({
 });
 
 userSchema.static('loginUser', function loginUser(email: string, password: string) {
-  return this.findOne({ email }).select(+password)
+  return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         throw new AuthError('Неверное имя или пароль');
