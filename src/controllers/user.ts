@@ -10,6 +10,14 @@ export const getUsers = (req: Request, res: Response, next: NextFunction) => Use
   .then((users) => res.send({ users }))
   .catch(next);
 
+export const getMe = (req: RequestCustom, res: Response, next: NextFunction) => {
+  const id = req?.user?._id;
+
+  return User.findById(id)
+    .then((user) => res.send({ user }))
+    .catch(next);
+};
+
 export const getUserById = (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.userId;
 
@@ -31,7 +39,13 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
       if (!(password && email)) {
         throw new WrongDataError('Переданы не все данные');
       }
-      return res.send({ user });
+      return res.send({
+        name: user.name,
+        _id: user._id,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email
+      });
     })
     .catch(next);
 };
@@ -78,13 +92,5 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       const token = jwt.sign({ _id: user._id }, keyString, { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch(next);
-};
-
-export const getMe = (req: RequestCustom, res: Response, next: NextFunction) => {
-  const id = req?.user?._id;
-
-  return User.findById(id)
-    .then((user) => res.send({ user }))
     .catch(next);
 };
